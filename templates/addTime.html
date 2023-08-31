@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Leaderboard | Add Time</title>
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+        <style>
+            th, td {
+                border-bottom: 1px solid #ddd;
+                padding:5px;
+                text-align: left;
+                }
+                input[type="number"]
+                {
+                    width: 20%;
+                    padding:0.5%;
+                }
+                input[type="password"]
+                {
+                    width: 20%;
+                    padding:0.5%;
+                }
+                input[type="submit"]
+                {
+                    width:10%;
+                    height: 60px;
+                    padding:0.5%;
+                }
+                button
+                {
+                    padding: 0.5%;
+                    height: 60px;
+                    min-width:100px;
+                }
+                a 
+                {
+                    color: white; /* blue colors for links too */
+                    text-decoration: underline; /* no underline */
+                }
+
+        </style>
+    </head>
+    <body>
+        <a href="/" style="margin-top: 0;padding-top: 0;margin-bottom: 0%;">Back</a><br>
+        <h1 style="margin-bottom: 0;margin-top: 0;"> Record Race Time</h1>
+
+        <form action="/recordTime" method="post" enctype="application/x-www-form-urlencoded">
+            <label for='teamNo' style="width:200px;display: inline-block;">Team No: &nbsp</label><input type="number" name="teamNo" placeholder="123"><br><br>
+            <label for='time'  style="width:200px;display: inline-block;">New Time: (s)</label><input min="0" max="99" step="0.001"type="number" name="time" placeholder="0.920"><br><br>
+            <label id='pswdLbl' for='pkey'  style="width:200px;display: inline-block;">Password: </label><input type="password" name="pkey" placeholder="1234"><br><br>
+            <input type="submit" name="submit" value="Submit">
+            
+        </form>
+    </body>
+    
+    <script>
+        var alertInfo = "{{alert}}";
+        if (alertInfo != "")
+        {
+            alert(alertInfo);
+        }
+    </script>
+</html>

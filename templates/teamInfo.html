@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js"></script>
+<style>
+    .cc {
+        height:40vh;
+    }
+    .sub {
+        color:yellow;
+    }
+    a 
+    {
+        color: white; /* blue colors for links too */
+        text-decoration: underline; /* no underline */
+    }
+    h2
+    {
+        margin-bottom: 0;
+    }
+</style>
+<head>
+    <title>Team #{{teamNumber}}</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+    <a href="/" style="margin-top: 0;padding-top: 0;margin-bottom: 0%;">Back</a><br>
+    <h1 style="margin-bottom: 0;margin-top: 0;"> {{teamName}} <span class="sub">{{teamNumber}}</span></h1>
+    
+    Class: <span class = "SUB"> {{classgroup}} </span>
+    <h2>Members:</h2><span class="sub">{{membersList}}</span>
+    <h2>Best Time: <u class='sub'>{{fastestTime}}</u></h2>
+    <h2>Race History </h2>
+    In Milliseconds, Lower is better. Hover over points to see times. <br>
+    <div class="cc">
+    <canvas id="myChart"></canvas></div>
+
+</body>
+
+
+
+<script>
+    var ctx = document.getElementById('myChart').getContext('2d');
+    var chart = new Chart(ctx, {
+        // The type of chart we want to create
+        type: 'line',
+
+        // The data for our dataset
+        data: {
+            labels: {{labelsList | safe}},
+            datasets: [{
+                label: 'Times',
+                borderColor: 'rgb(255, 255, 0)',
+                data: {{timesList  | safe}},
+            }]
+        },
+
+        // Configuration options go here
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+
+        }
+    });
+</script>
+</html>

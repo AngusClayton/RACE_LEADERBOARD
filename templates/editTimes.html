@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Leaderboard | Edit Times</title>
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+        <style>
+            th, td {
+                border-bottom: 1px solid #ddd;
+                padding:5px;
+                text-align: left;
+                }
+                input[type="number"]
+                {
+                    width: 20%;
+                    padding:0.5%;
+                }
+                input[type="password"]
+                {
+                    width: 20%;
+                    padding:0.5%;
+                }
+                input[type="submit"]
+                {
+                    width:10%;
+                    height: 60px;
+                    padding:0.5%;
+                }
+                button
+                {
+                    padding: 0.5%;
+                    height: 60px;
+                    min-width:100px;
+                }
+                a 
+                {
+                    color: white; /* blue colors for links too */
+                    text-decoration: underline; /* no underline */
+                }
+
+        </style>
+    </head>
+    <body>
+        <a href="/" style="margin-top: 0;padding-top: 0;margin-bottom: 0%;">Back</a><br>
+        <h1 style="margin-bottom: 0;margin-top: 0;"> Edit Race Times</h1>
+        <p>Editing Times for <b>{{teamName}}</b></p>
+        <p>Click on Race Time field to edit data</p>
+        <button onclick="submitEntry()">Save Changes</button>
+       <table id="maintable">
+        <tr>
+            <th>Date & Time</th> <th>Race Time (Seconds)</th> <th>Delete</th>
+        </tr>
+        
+            {{table | safe}}
+        
+       </table>
+    </body>
+    
+    <script>
+         const currentURL = window.location.href;
+        const domain = currentURL.split('/', 3).join('/');
+        var alertInfo = "{{alert}}";
+        if (alertInfo != "")
+        {
+            alert(alertInfo);
+        }
+
+        function deleteEntry(time)
+        {
+            var table = document.getElementById('maintable');
+            var rows = table.getElementsByTagName('tr');
+            
+            for (var i = 1; i < rows.length; i++) {
+                var firstCell = rows[i].getElementsByTagName('td')[0];
+                var cellDataTime = firstCell.getAttribute('data-time');
+                if (cellDataTime == time) {
+                    table.deleteRow(i);
+                    break; // Exit the loop once the row is deleted
+                }
+            }
+        }
+
+        function submitEntry()
+        {
+            //---- complile data
+            var table = document.getElementById('maintable');
+            var rows = table.getElementsByTagName('tr');
+            var output = {};
+            var fastest = 999;
+            for (var i = 1; i < rows.length; i++) {
+                var timestamp = rows[i].getElementsByTagName('td')[0].getAttribute('data-time');
+                var time = parseFloat(rows[i].getElementsByTagName('td')[1].innerText);
+                output[timestamp] = time;
+                if (time < fastest) {fastest = time;}
+            }
+            //ensure always atleast one time
+
+            if (rows.length <= 1)
+            {
+                output["0"] = 999;
+            }
+            output = {"times":output,"fast":fastest}
+
+            console.log(output);
+            
+            //--- submit data via fetch post
+            let url = domain + '/editTimes';
+            //get passkey
+            let pkey = prompt('Enter Password');
+            if (pkey == null) {return;}
+
+            data = {'#': {{teamNo}}, 'changes':output ,'pkey':pkey};
+
+            
+            fetch(url, 
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    // Add any other headers as needed
+                },
+                body: JSON.stringify(data),
+            })
+            .then(response => {
+                if (response.status === 401) 
+                {
+                    alert("Your password was incorrect please try again.");
+                }
+             
+
+                else if (!response.ok) {
+                    alert("There was an error with your request, please try again.");
+                    throw new Error('Network response was not ok');
+                }
+                else
+                {
+                    alert("Team times updated successfully");
+                }   
+                
+            });
+            
+        }
+    </script>
+</html>

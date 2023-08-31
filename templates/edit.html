@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Leaderboard | EDIT</title>
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+        <style>
+            th, td {
+                border-bottom: 1px solid #ddd;
+                padding:5px;
+                text-align: left;
+                }
+                input[type="text"]
+                {
+                    width: 80%;
+                    padding:0.5%;
+                }
+                input[type="submit"]
+                {
+                    width:10%;
+                    height: 60px;
+                    padding:0.5%;
+                }
+                button
+                {
+                    padding: 0.5%;
+                    height: 60px;
+                    min-width:100px;
+                }
+                a 
+                {
+                    color: white; /* blue colors for links too */
+                    text-decoration: underline; /* no underline */
+                }
+
+        </style>
+    </head>
+    <body>
+        <h1  style="margin-bottom: 0;margin-top: 0;">Edit Leaderboard Entries</h1>
+        <a href="/" style="margin-top: 0;padding-top: 0;margin-bottom: 1%;">Back</a><br>
+        <form method="get" action="">
+            <input type="text" name="q" placeholder="Search by team number, team name, classgroup or member name"> <input type="submit" value="Search" style="height:100%;"></input> <a href=""><button style="height:100%;" onclick=""> Reset </button></a>
+        </form><br>
+        <button id="newTeamBtn" onclick="addTeam()" > Create New Team </button> <a href="/recordTime"><button > Add Time Entry </button></a>
+        <table id="maintable">
+            <tr>
+                <td>Team No</td>
+                <td>Class</td>
+                <td>Team Name</td>
+                <td>Members</td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+            {{ edittable | safe}}
+        </table>
+
+        
+    </body>
+    <script>
+        const currentURL = window.location.href;
+        const domain = currentURL.split('/', 3).join('/');
+        function isNumeric(n) 
+        {
+            return !isNaN(parseFloat(n)) && isFinite(n);
+        }
+        function addTeam() 
+        {
+            newTeamBtn.disabled  = true;
+            const newRow = maintable.insertRow(1); // Inserts at the top (after header row)
+            //change style
+            maintable.style.color = "#888";
+            newRow.style.color = "#FFF";
+            newRow.innerHTML = "<td contenteditable=\"true\">#</td><td contenteditable=\"true\">0W</td><td contenteditable=\"true\">teamName</td><td contenteditable=\"true\">member1, member2</td><td><button onclick=\"saveNewTeam()\"> Save New Team </button></td><td></td><td><button onclick=\"cancelNewTeam()\"> Cancel </button></td>"
+        }
+
+        function cancelNewTeam()
+        {
+            newTeamBtn.disabled  = false;
+            maintable.deleteRow(1);
+            maintable.style.color = "#FFF";
+        }
+
+        function saveNewTeam()
+        {
+            var newTeamRow = maintable.rows[1];
+            var teamNo = newTeamRow['cells'][0].textContent;
+            var classgroup = newTeamRow['cells'][1].textContent;
+            var name = newTeamRow['cells'][2].textContent;
+            var members = newTeamRow['cells'][3].textContent;
+            if (!isNumeric(teamNo))
+            {
+                alert("Error! Must select a team number which is a number integer e.g. 1, 2, 55 etc.");
+                return;
+            }
+            if (members == "member1, member2" || members == "")
+            {
+                alert("Error! Please enter your team members.");
+                return;
+            }
+            if (name == "teamname" || name == "")
+            {
+                alert("Error! Please enter your team name.");
+                return;
+            }
+            if (classgroup == "0W" || classgroup == "")
+            {
+                alert("Error! Please enter the team classgroup.");
+                return;
+            }
+            //'https://' + domain '/newTeam'
+            let url = domain + '/newTeam';
+
+
+            //get passkey
+            let pkey = prompt('Enter Password');
+            if (pkey == null) {return;}
+
+            
+
+            data = {'#': teamNo, 'members': members, 'name':name, 'classgroup':classgroup,'pkey':pkey};
+
+            
+            fetch(url, 
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    // Add any other headers as needed
+                },
+                body: JSON.stringify(data),
+            })
+            .then(response => {
+                if (response.status === 401) 
+                {
+                    alert("Your password was incorrect please try again.");
+                }
+                else if (response.status === 400) 
+                {
+                    alert("Team number already exists! Please try another number!");
+                    throw new Error('Invalid Team Number!');
+                }
+
+                else if (!response.ok) {
+                    alert("There was an error with your request, please try again.");
+                    throw new Error('Network response was not ok');
+                }
+                else
+                {
+                    alert("Team created successfully");
+                    cancelNewTeam();
+                }   
+                
+            });
+            
+
+        }
+        
+        function deleteTeam(teamNo)
+        {
+            
+            
+            let url = domain + '/deleteTeam';
+            
+            //make sure user sure:
+            if(!window.confirm("Are you sure you want to proceed with deleting team #" + teamNo + "?"))
+            {
+                return;
+            }
+
+            //get passkey
+            let pkey = prompt('Enter Password');
+            if (pkey == null) {return;}
+
+            
+
+            data = {'#': teamNo, 'pkey':pkey};
+
+            
+            fetch(url, 
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    // Add any other headers as needed
+                },
+                body: JSON.stringify(data),
+            })
+            .then(response => {
+                if (response.status === 401) 
+                {
+                    alert("Your password was incorrect please try again.");
+                }
+
+                else if (!response.ok) {
+                    alert("There was an error with your request, please try again.");
+                    throw new Error('Network response was not ok');
+                }
+                else
+                {
+                    alert("Team deleted successfully");
+                    location.reload();
+                }   
+                
+            });
+            
+
+        }
+
+
+        function formatCommaSeperatedValues(input) 
+        {
+            const segments = input.split(',');
+    const formattedSegments = segments.map(segment => segment.trim());
+    const formattedString = formattedSegments.join(', ');
+    return formattedString;
+    }
+
+        function save(teamNo,rowNo)
+        {
+            var row = maintable.rows[rowNo];
+            //------------ input data valid check:
+            var teamNo = row['cells'][0].textContent;
+            var classgroup = row['cells'][1].textContent;
+            var name = row['cells'][2].textContent;
+            var members = row['cells'][3].textContent;
+            if (!isNumeric(teamNo))
+            {
+                alert("Error! Must select a team number which is a number integer e.g. 1, 2, 55 etc.");
+                return;
+            }
+            if (members == "member1, member2" || members == "")
+            {
+                alert("Error! Please enter your team members.");
+                return;
+            }
+            if (name == "teamname" || name == "")
+            {
+                alert("Error! Please enter your team name.");
+                return;
+            }
+            if (classgroup == "0W" || classgroup == "")
+            {
+                alert("Error! Please enter the team classgroup.");
+                return;
+            }
+            //------ format members string
+            members = formatCommaSeperatedValues(members);
+            var changes = {"name":name,"members":members, "classgroup":classgroup};
+            //----- send post req
+            let url = domain + '/updateTeam';
+
+
+            //get passkey
+            let pkey = prompt('Enter Password');
+            if (pkey == null) {return;}
+
+
+
+            data = {'#': teamNo, "changes":{changes}, 'pkey':pkey};
+
+
+            fetch(url, 
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    // Add any other headers as needed
+                },
+                body: JSON.stringify(data),
+            })
+            .then(response => {
+                console.log(response);
+                if (response.status == 401) 
+                {
+                    alert("Your password was incorrect please try again.");
+                }
+
+
+
+                else if (!response.ok) {
+                    alert("There was an error with your request, please try again.");
+                    throw new Error('Network response was not ok');
+                }
+                else
+                {
+                    alert("Team updated successfully");
+                }   
+                
+            });
+
+        }
+    
+    
+    
+    </script>
+</html>

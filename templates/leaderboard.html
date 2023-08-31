@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Leaderboard | {{classgroup}}</title>
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+        <style>
+            a {
+              color: white; /* blue colors for links too */
+              text-decoration: underline; /* no underline */
+            }
+        </style>
+    </head>
+    <body>
+        <img style="float:right;width:10%;" src='{{ url_for('static', filename='img/1.png') }}' />
+        <img style="float:right;width:10%;" src='{{ url_for('static', filename='img/2.png') }}' />
+        <img style="float:right;width:10%;" src='{{ url_for('static', filename='img/3.png') }}' />
+        <img style="float:right;width:10%;" src='{{ url_for('static', filename='img/4.png') }}' />
+
+        <h1 style="margin-bottom: 0;margin-top: 0;">{{classgroup}} Leaderboard</h1>
+        <a href="/" style="margin-top: 0;padding-top: 0;">Back</a>
+        <table style='width:100%'>
+            <colgroup>
+            <col width="10%">
+            <col width="15%">
+            <col  width="40%">
+            <col  width="20%">
+            <col  width="10%">
+            </colgroup>
+            
+            <tr>
+                <th>#</th>
+                <th>Team No</th>
+                <th>Team Name</th>
+                <th>Time</th>
+                <th>Class</th>
+            </tr>
+            {{ tableContent | safe }}
+        </table>
+</body>
